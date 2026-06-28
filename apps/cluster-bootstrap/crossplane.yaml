@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+  annotations:
+    # 💡 Sync Wave -5 ensures this launches immediately after Cilium stabilizes
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.crossplane.io/stable'
+    chart: crossplane
+    targetRevision: 2.3.3 # Matches your required 2.3.3 engine version
+    helm:
+      # Modern native YAML format replacing CLI parameters
+      valuesObject:
+        args: [] # 💡 Crossplane v2.x runs functions & validation natively; flags are empty
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: crossplane-system # Your target namespace parameter replacement
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Replicates your '--create-namespace' flag
