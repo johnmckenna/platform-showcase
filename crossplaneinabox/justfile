@@ -1,0 +1,113 @@
+set export
+set shell := ["bash", "-uc"]
+set script-interpreter := ['/usr/bin/env', 'bash']
+set unstable
+                                 
+yaml          := justfile_directory() + "/yaml"
+              
+browse        := if os() == "linux" { "xdg-open "} else { "open" }
+copy          := if os() == "linux" { "xsel -ib"} else { "pbcopy" }
+replace       := if os() == "linux" { "sed -i"} else { "sed -i '' -e" }
+                                 
+# this list of available targets
+# targets marked with * are main targets
+default:
+  just --list --unsorted
+
+# * setup kind cluster with Crossplane, ArgoCD and launch argocd in browser
+setup: setup_kind setup_crossplane setup_argo launch_argo
+
+# setup kind cluster
+[script]
+setup_kind cluster_name='control-plane' cilium_version='v1.19.5':
+  set -euo pipefail
+  echo "Creating kind cluster - {{cluster_name}}"
+  if kind get clusters 2> /dev/null | grep -q "{{cluster_name}}"; then
+    echo "Cluster {{cluster_name}} already exists - aborting installation"
+  else
+    envsubst < kind-config.yaml | kind create cluster --config -
+    kubectl config use-context kind-{{cluster_name}}
+    if command -v docker &> /dev/null; then
+      docker pull quay.io/cilium/cilium:{{cilium_version}}
+      kind load docker-image quay.io/cilium/cilium:{{cilium_version}} -n {{cluster_name}}
+    elif command -v podman &> /dev/null; then
+      podman pull quay.io/cilium/cilium:{{cilium_version}}
+      podman save > cilium.tar quay.io/cilium/cilium:{{cilium_version}}
+      kind load image-archive cilium.tar -n {{cluster_name}}
+      rm cilium.tar
+    elif command -v nerdctl &> /dev/null; then
+      nerdctl pull quay.io/cilium/cilium:{{cilium_version}}
+      nerdctl save quay.io/cilium/cilium:{{cilium_version}} > cilium.tar
+      kind load image-archive cilium.tar -n {{cluster_name}}
+    else
+      echo "No container runtime found (docker, podman, nerdctl)"
+      exit 1
+    fi
+    helm repo add cilium https://helm.cilium.io/
+    helm repo update
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_gateways.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_backendtlspolicies.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/standard/gateway.networking.k8s.io_tlsroutes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.5.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+    helm upgrade --install cilium cilium/cilium --version {{cilium_version}} \
+    --namespace kube-system \
+    --set image.pullPolicy=IfNotPresent \
+    --set ipam.mode=kubernetes \
+    --set gatewayAPI.enabled=true \
+    --set k8sServiceHost={{cluster_name}}-control-plane \
+    --set k8sServicePort=6443 \
+    --set kubeProxyReplacement=true
+  fi
+# setup universal crossplane
+[script]
+setup_crossplane xp_namespace='crossplane-system':
+  echo "Installing Crossplane"
+  if kubectl get namespace {{xp_namespace}} > /dev/null 2>&1; then
+    echo "Namespace {{xp_namespace}} already exists - aborting installation"
+  else
+    echo "Installing crossplane version"
+    helm repo add crossplane-stable https://charts.crossplane.io/stable
+    helm repo update
+    helm upgrade --install crossplane --create-namespace --namespace {{xp_namespace}} crossplane-stable/crossplane --version 2.3.3
+    kubectl wait --for condition=Available=True --timeout=300s deployment/crossplane --namespace {{xp_namespace}}
+  fi
+# setup ArgoCD and expose it via Gateway API TLSRoute
+[script]
+setup_argo argo_namespace='argocd':
+  shopt -s extglob
+  echo "Installing ArgoCD"
+  if kubectl get namespace {{argo_namespace}} > /dev/null 2>&1; then
+    echo "Namespace {{argo_namespace}} already exists - aborting installation"
+  else
+    kubectl create namespace {{argo_namespace}}
+    kubectl apply -n {{argo_namespace}} --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl wait --for condition=Available=True --timeout=300s deployment/argocd-server --namespace {{argo_namespace}}
+    for file in yaml/argocd!(*-patch).yaml; do
+      envsubst < "$file" | kubectl apply -f -
+    done
+    kubectl patch cm argocd-cm -n argocd --patch-file yaml/argocd-cm-patch.yaml
+    kubectl rollout restart deployment argocd-repo-server -n argocd
+    kubectl rollout restart statefulset argocd-application-controller -n argocd
+    echo "Asking for sudo password to run cloud-provider-kind as root"
+    sudo -E nohup cloud-provider-kind -enable-lb-port-mapping > /dev/null 2>&1 &
+    kubectl wait --for=jsonpath='{.status.addresses[0].value}' --timeout=300s gateway/argocd-gw --namespace {{argo_namespace}}
+  fi
+# copy ArgoCD server secret to clipboard and launch browser, user admin, pw paste from clipboard
+[script]
+launch_argo argo_namespace='argocd':
+  kubectl -n {{argo_namespace}} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d | {{copy}}
+  sleep 3
+  ARGOGWIPADDR=$(kubectl get gateway -n {{argo_namespace}} argocd-gw -o jsonpath='{.status.addresses[].value}')
+  nohup {{browse}} http://$ARGOGWIPADDR >/dev/null 2>&1 &
+
+# * delete KIND cluster
+[script]
+teardown cluster_name='control-plane':
+  echo "Asking for sudo password to stop cloud-provider-kind"
+  sudo pkill -f cloud-provider-kind
+  echo "Delete KIND cluster"
+  kind delete cluster -n {{cluster_name}}

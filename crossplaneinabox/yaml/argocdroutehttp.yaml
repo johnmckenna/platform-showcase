@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: argocd-server
+  namespace: $argo_namespace
+spec:
+  parentRefs:
+    - name: argocd-gw # Replace with your Gateway name
+      namespace: argocd # Replace with your Gateway's namespace
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: / # Adjust path as needed
+      backendRefs:
+        - name: argocd-server
+          port: 80

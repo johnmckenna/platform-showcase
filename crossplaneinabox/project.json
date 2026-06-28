@@ -1,0 +1,27 @@
+{
+    "name": "crossplaneinabox",
+    "version": "1.0.0",
+    "targets": {
+        "start": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "just setup",
+                "cwd": "crossplaneinabox"
+            }
+        },
+        "just": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "just",
+                "cwd": "crossplaneinabox"
+            }
+        },
+        "stop": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "just teardown",
+                "cwd": "crossplaneinabox"
+            }
+        }
+    }
+}
