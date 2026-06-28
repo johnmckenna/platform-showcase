@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.17.5/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@24",
+    "kind@latest",
+    "cloud-provider-kind@latest",
+    "kubectl@latest",
+    "kubernetes-helm@latest",
+    "cilium-cli@latest",
+    "hubble@latest",
+    "crossplane-cli@latest",
+    "argocd@latest",
+    "just@latest",
+    "kubeconform@latest"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "true"
+  },
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null",
+      "pnpm install -s",
+      "alias nx='pnpm dlx nx'",
+      "alias k='kubectl'"
+    ],
+    "scripts": {
+      "test": [
+        "echo \"Error: no test specified\" && exit 1"
+      ]
+    }
+  }
+}
