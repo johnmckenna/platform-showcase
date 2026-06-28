@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-api-crds
+  namespace: argocd
+  annotations:
+    # 💡 Forces schemas to register before any cluster dependencies initiate
+    argocd.argoproj.io/sync-wave: "-20"
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/johnmckenna/platform-showcase.git'
+    targetRevision: HEAD
+    path: 'apps/cluster-bootstrap/gateway-crds-kustomize' # Targets your Kustomize file
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false # Safety rule: If the app is uninstalled, leave CRDs intact to protect routes
+      selfHeal: true
+    syncOptions:
+      - Replace=true # Required to bypass standard etcd annotation size limits on massive CRD files
