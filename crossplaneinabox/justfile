@@ -19,7 +19,7 @@ setup: setup_kind setup_argo
 
 # setup kind cluster
 [script]
-setup_kind cluster_name='control-plane' cilium_version='v1.19.5':
+setup_kind cluster_name='control-plane' cilium_version='1.19.5':
   set -euo pipefail
   echo "Creating kind cluster - {{cluster_name}}"
   if kind get clusters 2> /dev/null | grep -q "{{cluster_name}}"; then
@@ -65,7 +65,6 @@ setup_kind cluster_name='control-plane' cilium_version='v1.19.5':
 # setup ArgoCD
 [script]
 setup_argo argo_namespace='argocd':
-  set -euo pipefail
   echo "Installing ArgoCD"
   if kubectl get namespace {{argo_namespace}} > /dev/null 2>&1; then
     echo "Namespace {{argo_namespace}} already exists - aborting installation"
