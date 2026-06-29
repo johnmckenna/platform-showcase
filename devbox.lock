@@ -193,6 +193,54 @@
         }
       }
     },
+    "dapr-cli@latest": {
+      "last_modified": "2026-05-21T08:15:18Z",
+      "resolved": "github:NixOS/nixpkgs/4a29d733e8a7d5b824c3d8c958a946a9867b3eb2#dapr-cli",
+      "source": "devbox-search",
+      "version": "1.17.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wf26sn92gvyslwl3dih33vxi8vjmbnxn-dapr-cli-1.17.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wf26sn92gvyslwl3dih33vxi8vjmbnxn-dapr-cli-1.17.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7rb50igbxpkz22gkzbxc7gz5vv1k54ma-dapr-cli-1.17.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7rb50igbxpkz22gkzbxc7gz5vv1k54ma-dapr-cli-1.17.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xxzxgdc35ch8r7hx1r8cwapqz1pd93hz-dapr-cli-1.17.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xxzxgdc35ch8r7hx1r8cwapqz1pd93hz-dapr-cli-1.17.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7x273lvmv977a6pxy256gpw4rxb2b8n9-dapr-cli-1.17.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7x273lvmv977a6pxy256gpw4rxb2b8n9-dapr-cli-1.17.1"
+        }
+      }
+    },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
       "last_modified": "2026-06-23T00:43:55Z",
       "resolved": "github:NixOS/nixpkgs/89570f24e97e614aa34aa9ab1c927b6578a43775?lastModified=1782175435&narHash=sha256-EMzXKmnOtBQ2MnvpiNOm7E%2BkOMvdPrIKaeg52Tip2Uk%3D"
