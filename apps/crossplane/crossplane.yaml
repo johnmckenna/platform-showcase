@@ -8,14 +8,17 @@ metadata:
     argocd.argoproj.io/sync-wave: "-5"
 spec:
   project: default
-  source:
-    repoURL: 'https://charts.crossplane.io/stable'
+  sources:
+  - repoURL: 'https://charts.crossplane.io/stable'
     chart: crossplane
     targetRevision: 2.3.3 # Matches your required 2.3.3 engine version
     helm:
       # Modern native YAML format replacing CLI parameters
       valuesObject:
         args: [] # 💡 Crossplane v2.x runs functions & validation natively; flags are empty
+  - repoURL: 'https://github.com/johnmckenna/platform-showcase.git'
+    targetRevision: HEAD
+    path: apps/crossplane/manifests
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: crossplane-system # Your target namespace parameter replacement
