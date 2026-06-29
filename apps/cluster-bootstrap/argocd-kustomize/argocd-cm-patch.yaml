@@ -1,3 +1,8 @@
+# +argocd:skip-file-rendering
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
 data:
   application.resourceTrackingMethod: annotation
   resource.customizations: |
