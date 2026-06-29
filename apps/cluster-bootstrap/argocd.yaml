@@ -9,8 +9,6 @@ spec:
     repoURL: https://github.com/johnmckenna/platform-showcase.git
     targetRevision: HEAD
     path: crossplaneinabox/yaml
-    kustomize:
-      commonAnnotationsEnvsubst: true
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
