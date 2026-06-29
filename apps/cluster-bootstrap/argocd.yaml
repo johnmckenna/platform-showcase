@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/johnmckenna/platform-showcase.git
     targetRevision: HEAD
-    path: crossplaneinabox/yaml
+    path: apps/cluster-bootstrap/argocd-kustomize
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
