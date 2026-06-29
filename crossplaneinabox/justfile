@@ -14,8 +14,8 @@ replace       := if os() == "linux" { "sed -i"} else { "sed -i '' -e" }
 default:
   just --list --unsorted
 
-# * setup kind cluster with Crossplane, ArgoCD and launch argocd in browser
-setup: setup_kind setup_crossplane setup_argo launch_argo
+# * setup kind cluster with ArgoCD and launch argocd in browser
+setup: setup_kind setup_argo
 
 # setup kind cluster
 [script]
@@ -62,23 +62,10 @@ setup_kind cluster_name='control-plane' cilium_version='v1.19.5':
     --set k8sServicePort=6443 \
     --set kubeProxyReplacement=true
   fi
-# setup universal crossplane
-[script]
-setup_crossplane xp_namespace='crossplane-system':
-  echo "Installing Crossplane"
-  if kubectl get namespace {{xp_namespace}} > /dev/null 2>&1; then
-    echo "Namespace {{xp_namespace}} already exists - aborting installation"
-  else
-    echo "Installing crossplane version"
-    helm repo add crossplane-stable https://charts.crossplane.io/stable
-    helm repo update
-    helm upgrade --install crossplane --create-namespace --namespace {{xp_namespace}} crossplane-stable/crossplane --version 2.3.3
-    kubectl wait --for condition=Available=True --timeout=300s deployment/crossplane --namespace {{xp_namespace}}
-  fi
-# setup ArgoCD and expose it via Gateway API TLSRoute
+# setup ArgoCD
 [script]
 setup_argo argo_namespace='argocd':
-  shopt -s extglob
+  set -euo pipefail
   echo "Installing ArgoCD"
   if kubectl get namespace {{argo_namespace}} > /dev/null 2>&1; then
     echo "Namespace {{argo_namespace}} already exists - aborting installation"
@@ -86,15 +73,9 @@ setup_argo argo_namespace='argocd':
     kubectl create namespace {{argo_namespace}}
     kubectl apply -n {{argo_namespace}} --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     kubectl wait --for condition=Available=True --timeout=300s deployment/argocd-server --namespace {{argo_namespace}}
-    for file in yaml/argocd!(*-patch|kustomization).yaml; do
-      envsubst < "$file" | kubectl apply -f -
-    done
-    kubectl patch cm argocd-cm -n {{argo_namespace}} --patch-file yaml/argocd-cm-patch.yaml
-    kubectl rollout restart deployment argocd-repo-server -n {{argo_namespace}}
-    kubectl rollout restart statefulset argocd-application-controller -n {{argo_namespace}}
+    envsubst < argocdinit.yaml | kubectl apply -f -
     echo "Asking for sudo password to run cloud-provider-kind as root"
     sudo -E nohup cloud-provider-kind -enable-lb-port-mapping > /dev/null 2>&1 &
-    kubectl wait --for=jsonpath='{.status.addresses[0].value}' --timeout=300s gateway/argocd-gw --namespace {{argo_namespace}}
   fi
 # copy ArgoCD server secret to clipboard and launch browser, user admin, pw paste from clipboard
 [script]
