@@ -13,13 +13,26 @@ patches:
     kind: Deployment
     name: argocd-repo-server
   patch: |
-    - op: add
-      path: /spec/template/metadata/annotations/config-version
-      value: "2026-06-29-v1"
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-repo-server
+    spec:
+      template:
+        metadata:
+          annotations:
+            config-version: "2026-06-29-v1"
+            
 - target:
     kind: StatefulSet
     name: argocd-application-controller
   patch: |
-    - op: add
-      path: /spec/template/metadata/annotations/config-version
-      value: "2026-06-29-v1"
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: argocd-application-controller
+    spec:
+      template:
+        metadata:
+          annotations:
+            config-version: "2026-06-29-v1"
