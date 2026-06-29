@@ -5,7 +5,9 @@ metadata:
   namespace: $argo_namespace
 spec:
   parentRefs:
-    - name: argocd-gw # Replace with your Gateway name
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: argocd-gw # Replace with your Gateway name
       namespace: argocd # Replace with your Gateway's namespace
   rules:
     - matches:
@@ -13,5 +15,8 @@ spec:
             type: PathPrefix
             value: / # Adjust path as needed
       backendRefs:
-        - name: argocd-server
+        - group: ''
+          kind: Service
+          name: argocd-server
           port: 80
+          weight: 1

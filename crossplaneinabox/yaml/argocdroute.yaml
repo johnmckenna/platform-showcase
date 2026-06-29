@@ -5,9 +5,14 @@ metadata:
   namespace: $argo_namespace
 spec:
   parentRefs:
-    - name: argocd-gw
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: argocd-gw
       namespace: argocd
   rules:
     - backendRefs:
-        - name: argocd-server
+        - group: ''
+          kind: Service
+          name: argocd-server
           port: 443
+          weight: 1
