@@ -86,12 +86,12 @@ setup_argo argo_namespace='argocd':
     kubectl create namespace {{argo_namespace}}
     kubectl apply -n {{argo_namespace}} --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     kubectl wait --for condition=Available=True --timeout=300s deployment/argocd-server --namespace {{argo_namespace}}
-    for file in yaml/argocd!(*-patch).yaml; do
+    for file in yaml/argocd!(*-patch|kustomization).yaml; do
       envsubst < "$file" | kubectl apply -f -
     done
-    kubectl patch cm argocd-cm -n argocd --patch-file yaml/argocd-cm-patch.yaml
-    kubectl rollout restart deployment argocd-repo-server -n argocd
-    kubectl rollout restart statefulset argocd-application-controller -n argocd
+    kubectl patch cm argocd-cm -n {{argo_namespace}} --patch-file yaml/argocd-cm-patch.yaml
+    kubectl rollout restart deployment argocd-repo-server -n {{argo_namespace}}
+    kubectl rollout restart statefulset argocd-application-controller -n {{argo_namespace}}
     echo "Asking for sudo password to run cloud-provider-kind as root"
     sudo -E nohup cloud-provider-kind -enable-lb-port-mapping > /dev/null 2>&1 &
     kubectl wait --for=jsonpath='{.status.addresses[0].value}' --timeout=300s gateway/argocd-gw --namespace {{argo_namespace}}
