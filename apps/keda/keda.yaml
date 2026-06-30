@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.io'
+    repoURL: 'https://kedacore.github.io/charts'
     chart: keda
     targetRevision: 2.20.1 # Keep this pinned to a stable v2.x baseline
   destination:
