@@ -1,21 +1,38 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: init
-  namespace: $argo_namespace
+  name: platform-showcase-apps
+  namespace: argocd
 spec:
-  destination:
-    namespace: $argo_namespace
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    path: apps
-    repoURL:  https://github.com/johnmckenna/platform-showcase.git
-    targetRevision: HEAD
-    directory:
-      recurse: true
-  syncPolicy:
-    automated:
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+  ignoreApplicationDifferences:
+  - jsonPointers:
+    - /spec/destination/namespace
+    - /spec/sources
+  generators:
+  - git:
+      repoURL: https://github.com/johnmckenna/platform-showcase.git
+      revision: HEAD
+      # Scans every immediate subdirectory under apps/
+      directories:
+      - path: apps/*
+  template:
+    metadata:
+      # Automatically names the app based on its folder name (e.g., crossplane, monitoring)
+      name: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/johnmckenna/platform-showcase.git
+        targetRevision: HEAD
+        # Dynamically targets the exact discovered folder path
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        # Keeps apps in the target namespace or splits them out if needed
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
