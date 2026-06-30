@@ -8,6 +8,7 @@ spec:
   - jsonPointers:
     - /spec/destination/namespace
     - /spec/sources
+    - /spec/source
   generators:
   - git:
       repoURL: https://github.com/johnmckenna/platform-showcase.git
