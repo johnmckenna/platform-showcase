@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/dapr/helm-charts'
+    repoURL: 'https://dapr.github.io/helm-charts/'
     chart: dapr
     targetRevision: 1.18.1
   destination:
