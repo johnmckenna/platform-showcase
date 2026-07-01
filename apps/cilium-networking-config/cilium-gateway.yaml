@@ -1,25 +1,28 @@
-# +argocd:skip-file-rendering
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: cilium-gw
   namespace: kube-system
+  annotations:
+    # Tells cert-manager to automatically create the wildcard TLS secret using our CA
+    cert-manager.io/cluster-issuer: "local-ca-issuer"
 spec:
   gatewayClassName: cilium
   listeners:
-  - protocol: HTTP
-    port: 80
-    name: http
-    hostname: "10-89-0-10.nip.io"
-  - protocol: TLS
-    port: 443
-    name: https
-    hostname: "10-89-0-10.nip.io"
-    tls:
-      mode: Passthrough
-    allowedRoutes:
-      namespaces:
-        from: All
-  addresses:
-  - type: IPAddress
-    value: 10.89.0.10
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.10.89.0.10.sslip.io"
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.10.89.0.10.sslip.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: cilium-wildcard-tls-secret
+      allowedRoutes:
+        namespaces:
+          from: All
