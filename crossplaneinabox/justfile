@@ -61,6 +61,7 @@ setup_kind cluster_name='control-plane' cilium_version='1.19.5':
     --set k8sServiceHost={{cluster_name}}-control-plane \
     --set k8sServicePort=6443 \
     --set kubeProxyReplacement=true
+    --set l2announcements.enabled=true
   fi
 # setup ArgoCD
 [script]
@@ -73,8 +74,6 @@ setup_argo argo_namespace='argocd':
     kubectl apply -n {{argo_namespace}} --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     kubectl wait --for condition=Available=True --timeout=300s deployment/argocd-server --namespace {{argo_namespace}}
     envsubst < argocdinit.yaml | kubectl apply -f -
-    echo "Asking for sudo password to run cloud-provider-kind as root"
-    sudo -E nohup cloud-provider-kind -enable-lb-port-mapping > /dev/null 2>&1 &
   fi
 # copy ArgoCD server secret to clipboard and launch browser, user admin, pw paste from clipboard
 [script]
@@ -82,7 +81,7 @@ launch_argo argo_namespace='argocd':
   kubectl -n {{argo_namespace}} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d | {{copy}}
   sleep 3
   ARGOGWIPADDR=$(kubectl get gateway -n {{argo_namespace}} argocd-gw -o jsonpath='{.status.addresses[].value}')
-  nohup {{browse}} http://$ARGOGWIPADDR >/dev/null 2>&1 &
+  nohup {{browse}} "http://$ARGOGWIPADDR" >/dev/null 2>&1 &
 
 # * delete KIND cluster
 [script]

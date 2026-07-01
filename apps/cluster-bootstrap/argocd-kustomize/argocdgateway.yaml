@@ -10,11 +10,16 @@ spec:
   - protocol: HTTP
     port: 80
     name: argocd-http
+    hostname: "argocd-10-89-0-10.nip.io"
   - protocol: TLS
     port: 443
     name: argocd-https
+    hostname: "argocd-10-89-0-10.nip.io"
     tls:
       mode: Passthrough
     allowedRoutes:
       namespaces:
         from: Same
+  addresses:
+  - type: IPAddress
+    value: 10.89.0.10

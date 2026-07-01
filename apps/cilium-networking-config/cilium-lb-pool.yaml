@@ -1,0 +1,9 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: podman-static-pool
+  namespace: kube-system
+spec:
+  blocks:
+  - start: "10.89.0.10"
+    end: "10.89.0.200"

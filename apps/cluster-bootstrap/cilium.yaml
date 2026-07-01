@@ -17,6 +17,8 @@ spec:
           pullPolicy: IfNotPresent
         ipam:
           mode: kubernetes
+        l2announcements:
+          enabled: true
         gatewayAPI:
           enabled: true
         k8sServiceHost: control-plane-control-plane
