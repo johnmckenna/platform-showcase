@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     # Uses the official Jetstack Helm chart repository directly
-  - repoURL: 'https://jetstack.io'
+  - repoURL: 'https://charts.jetstack.io'
     chart: cert-manager
     targetRevision: v1.20.3 # Pins to a stable release version
     helm:
@@ -27,3 +27,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
