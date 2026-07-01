@@ -8,13 +8,15 @@ spec:
   parentRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: argocd-gw # Replace with your Gateway name
-      namespace: argocd # Replace with your Gateway's namespace
+      name: cilium-gw
+      namespace: kube-system
+  hostnames:
+    - "10-89-0-10.nip.io"
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: / # Adjust path as needed
+            value: /argocd
       backendRefs:
         - group: ''
           kind: Service
