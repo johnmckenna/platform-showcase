@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: argocd
 resources:
 - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-- argocdroute.yaml
-- argocdroutehttp.yaml
+- argocd-backend-tls.yaml
+- argocd-httproute.yaml
 patches:
 - path: argocd-cm-patch.yaml
 - target:
