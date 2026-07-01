@@ -5,9 +5,9 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
+  sources:
     # Uses the official Jetstack Helm chart repository directly
-    repoURL: 'https://jetstack.io'
+  - repoURL: 'https://jetstack.io'
     chart: cert-manager
     targetRevision: v1.20.3 # Pins to a stable release version
     helm:
@@ -15,6 +15,9 @@ spec:
         # CRUCIAL: Automatically installs the required CustomResourceDefinitions (CRDs)
         - name: crds.enabled
           value: 'true'
+  - repoURL: 'https://github.com/johnmckenna/platform-showcase.git'
+    targetRevision: HEAD
+    path: apps/cert-manager/manifests
   destination:
     server: 'https://kubernetes.kdefault.svc'
     namespace: cert-manager
