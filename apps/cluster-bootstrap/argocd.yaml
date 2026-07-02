@@ -43,7 +43,7 @@ spec:
                 namespace: kube-system
                 sectionName: https
             hostnames:
-              - grpc.argocd.10.89.0.10.sslip.io
+              - grpc-argocd.10.89.0.10.sslip.io
             rules:
               - backendRefs:
                   - name: argocd-server
