@@ -60,9 +60,9 @@ spec:
             validation:
               hostname: argocd-server.argocd.svc.cluster.local
               caCertificateRefs:
-                - name: argocd-server-tls
-                  group: ""
-                  kind: Secret
+                - group: ""
+                  kind: ConfigMap
+                  name: argocd-ca-bundle
       patchesStrategicMerge:
       - argocd-kustomize/argocd-cm-patch.yaml
   destination:
