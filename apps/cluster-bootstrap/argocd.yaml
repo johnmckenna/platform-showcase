@@ -19,6 +19,13 @@ spec:
         server:
           certificate:
             enabled: true
+            issuer:
+              name: local-ca-issuer
+              kind: ClusterIssuer
+            usages:
+              - digital signature
+              - key encipherment
+              - server auth
           # Gateway API integration
           httproute:
             enabled: true
