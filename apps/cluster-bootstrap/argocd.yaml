@@ -63,6 +63,8 @@ spec:
                 - group: ""
                   kind: ConfigMap
                   name: argocd-ca-bundle
+          service:
+            servicePortHttpsAppProtocol: kubernetes.io/h2c
       patchesStrategicMerge:
       - argocd-kustomize/argocd-cm-patch.yaml
   destination:
