@@ -17,6 +17,13 @@ spec:
           value: 'true'
         - name: config.enableGatewayAPI
           value: 'true'
+  - repoURL: 'https://charts.jetstack.io'
+    chart: trust-manager
+    targetRevision: v0.24.0 # Pins to a stable release version
+    helm:
+      parameters:
+        - name: app.trust.namespace
+          value: 'cert-manager'
   - repoURL: 'https://github.com/johnmckenna/platform-showcase.git'
     targetRevision: HEAD
     path: apps/cert-manager/manifests
