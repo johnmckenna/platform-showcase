@@ -48,6 +48,8 @@ spec:
                 certificateRefs:
                   - kind: Secret
                     name: argocd-server-tls
+      patchesStrategicMerge:
+      - argocd-kustomize/argocd-cm-patch.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
