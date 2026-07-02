@@ -44,6 +44,10 @@ spec:
                 sectionName: https
             hostnames:
               - grpc.argocd.10.89.0.10.sslip.io
+            rules:
+              - backendRefs:
+                  - name: argocd-server
+                    port: 443
 
           # Backend TLS policy (strict)
           backendTLSPolicy:
