@@ -1,0 +1,18 @@
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: argocd-ca-bundle
+spec:
+  sources:
+    # 1. Read the root/intermediary CA cert from the cert-manager secret
+    - secret:
+        name: "argocd-server-tls"
+        key: "ca.crt"
+  target:
+    # 2. Write it out automatically as a ConfigMap
+    configMap:
+      key: "ca.crt"
+    # 3. Synchronise it specifically to the target argocd namespace
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: argocd
