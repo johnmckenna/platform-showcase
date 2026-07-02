@@ -48,13 +48,17 @@ spec:
           # Backend TLS policy (strict)
           backendTLSPolicy:
             enabled: true
-            hostname: argocd-server.argocd.svc.cluster.local
-            additionalFields:
-              tls:
-                mode: Strict
-                certificateRefs:
-                  - kind: Secret
-                    name: argocd-server-tls
+            targetRefs:
+              - group: ""
+                kind: Service
+                name: argocd-server
+                sectionName: https
+            validation:
+              hostname: argocd-server.argocd.svc.cluster.local
+              caCertificateRefs:
+                - name: argocd-server-tls
+                  group: ""
+                  kind: Secret
       patchesStrategicMerge:
       - argocd-kustomize/argocd-cm-patch.yaml
   destination:
