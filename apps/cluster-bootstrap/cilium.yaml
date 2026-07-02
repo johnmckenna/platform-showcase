@@ -21,6 +21,7 @@ spec:
           enabled: true
         gatewayAPI:
           enabled: true
+          enableAlpn: true
         k8sServiceHost: control-plane-control-plane
         k8sServicePort: 6443
         kubeProxyReplacement: true
